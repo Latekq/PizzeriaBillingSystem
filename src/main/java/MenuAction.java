@@ -48,7 +48,7 @@ public class MenuAction extends JPanel {
         toolBar.add(exitButton);
 
 
-        fullscreenItem.addActionListener(e -> {
+        fullscreenItem.addActionListener(e -> { // fullscreen resize screen
             for ( Window w : Window.getWindows() ) {
                 GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().setFullScreenWindow( !fullScreen ? w : null );
             }
@@ -56,6 +56,6 @@ public class MenuAction extends JPanel {
 
         });
 
-        exitItem.addActionListener(e -> System.exit(0));
+        exitItem.addActionListener(e -> System.exit(0)); // close aplication
     }
 }
