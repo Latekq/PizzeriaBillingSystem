@@ -2,8 +2,6 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class MenuAction extends JPanel {
     //http://www.java2s.com/Code/Java/Swing-JFC/ThisexamplecreateamenubarandtoolbarbothpopulatedwithAction.htm
@@ -16,15 +14,12 @@ public class MenuAction extends JPanel {
     public MenuAction() {
         super(true);
 
-        // Create a menu bar and give it a bevel border.
         menuBar = new JMenuBar();
         menuBar.setBorder(new BevelBorder(BevelBorder.RAISED));
 
-        // Create a menu and add it to the menu bar.
         JMenu menu = new JMenu("Menu");
         menuBar.add(menu);
 
-        // Create a toolbar and give it an etched border.
         toolBar = new JToolBar();
         toolBar.setBorder(new EtchedBorder());
 
@@ -53,9 +48,14 @@ public class MenuAction extends JPanel {
                 GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().setFullScreenWindow( !fullScreen ? w : null );
             }
             fullScreen = !fullScreen;
-
         });
 
         exitItem.addActionListener(e -> System.exit(0)); // close aplication
+
     }
+
+    public boolean isFullScreen() {
+        return fullScreen;
+    }
+
 }
