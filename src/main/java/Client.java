@@ -78,7 +78,7 @@ public class Client {
 
     @Override
     public String toString() {
-        return  "Imie ='" + name + '\'' +
+        return  (getId() == 0? "id = '0'": "") + "Imie ='" + name + '\'' +
                 ", Nazwisko = '" + lastName + '\'' +
                 ", Numer telefonu = '" + phoneNumber + '\'' +
                 ", Ulica ='" + adress + '\'' +
