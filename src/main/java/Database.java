@@ -9,18 +9,18 @@ public class Database {
     private Statement statement;
     public Connection openConnection() {
         if (conn == null) {
-            String url = "jdbc:mysql://localhost/";
+            String url = "jdbc:mysql://188.68.231.165:3306/";
             String dbName = "pizzeria";
             String driver =  "com.mysql.cj.jdbc.Driver";
-            String userName = "root";
-            String password = "";
+            String userName = "pizzeria";
+            String password = "vauvfsWNrGcRWrH7";
 
             try {
                 Class.forName(driver);
                 this.conn =   DriverManager.getConnection(url+dbName,userName,password);
                 System.out.println("CONNECTION SUCCEFUL");
             } catch (Exception e) {
-                System.err.println(e);
+                e.printStackTrace();
             }
         }
         return conn;
@@ -88,7 +88,7 @@ public class Database {
     }
 
     public void addPizza(String name, String skladniki, float  cena) {
-        if(name == "" && skladniki == "" && cena <= 0.00) {
+        if(name.equals("") && skladniki.equals("") && cena <= 0.00) {
             System.err.println("zla wartosc");
             return;
         }
