@@ -44,7 +44,7 @@ public class billingSystemFrame extends JFrame {
         db.openConnection();
 
 
-        MenuAction menuAction = new MenuAction();
+        MenuAction menuAction = new MenuAction(this);
         setJMenuBar(menuAction.menuBar);
         fullscreen = menuAction.isFullScreen();
 
@@ -266,18 +266,20 @@ public class billingSystemFrame extends JFrame {
 
         search.addActionListener(e->{
             System.out.println("Szukaj");
+
             if(db.szukajPoNr(phoneNumberText.getText()) != null) {
-                nameClientText.setText(db.szukajPoNr(phoneNumberText.getText()).getName());
-                lastNameClientText.setText(db.szukajPoNr(phoneNumberText.getText()).getLastName());
-                streetClientText.setText(db.szukajPoNr(phoneNumberText.getText()).getAdress());
-                apartmentNumberText.setText(db.szukajPoNr(phoneNumberText.getText()).getApartamentNumber());
+                client = db.szukajPoNr(phoneNumberText.getText());
+                nameClientText.setText(client.getName());
+                lastNameClientText.setText(client.getLastName());
+                streetClientText.setText(client.getAdress());
+                apartmentNumberText.setText(client.getApartamentNumber());
             } else {
                 infoBox("Brak numeru telefonu.", "Error", "RED");
             }
         });
 
         listClient.addListSelectionListener(e->{
-            System.out.println(listClient.getSelectedIndex());
+            //System.out.println(listClient.getSelectedIndex());
             int i = listClient.getSelectedIndex()+1;
             if (i >= 1) {
                 client = clients[i-1];
@@ -445,7 +447,7 @@ public class billingSystemFrame extends JFrame {
         pursue.addActionListener(e -> {
             System.out.println("purse");
             System.out.println(order);
-            if (order.getPosition().size() != 0  && order.getClient().getId() != 0 && order.getClient().getPhoneNumber().length() == 9 && order.getClient().getName().length() >= 3) {
+            if (order.getClient() !=null && order.getPosition().size() != 0  && order.getClient().getId() != 0 && order.getClient().getPhoneNumber().length() == 9 && order.getClient().getName().length() >= 3) {
                 db.addOrder(order);
                 infoBox("Dodano zamówienie!", "Dodano zamówienie", "Green");
                 phoneNumberText.setText("");
@@ -469,13 +471,11 @@ public class billingSystemFrame extends JFrame {
                 revalidate();
                 repaint();
             } else {
-                infoBox("Nie uzupełniono wszystkich danych!" +
-                                (order.getPosition().size() != 0 ? "" : "Brak wybranej pizzy<br>")
-                        +(order.getClient().getId() == 0? "" : "Zle dane Clienta<br>")
-                        +(order.getClient().getPhoneNumber().length() == 9? "": "Zły nr telefonu<br>")
-                                + (order.getClient().getName().length() >= 3? "": "Błąd w imieniu<br>")
-
-                        , "Error", "RED");
+                infoBox("Nie uzupełniono wszystkich danych!<br>"
+                        +(order.getPosition().size() != 0 ? "" : "Brak wybranej pizzy<br>")
+                        +(order.getClient() == null ? "Brak danych o kliencie<br>": (order.getClient().getPhoneNumber().length() == 9? "": "Zły nr telefonu<br>") + (order.getClient().getName().length() >= 3? "": "Błąd w imieniu<br>"))
+                        , "Error",
+                        "RED");
             }
         });
 
@@ -511,7 +511,7 @@ public class billingSystemFrame extends JFrame {
 
 
             client = new Client(
-                    client.getId() == 0? 0: client.getId(),
+                    0,
                     nameClientText.getText(),
                     lastNameClientText.getText(),
                     phoneNumberText.getText(),
@@ -523,10 +523,10 @@ public class billingSystemFrame extends JFrame {
                 System.out.println("Utworzono klienta");
                 System.out.println("Klient"  + client);
                 db.addClient(client);
-                client.setId(db.getIdByPhoneNumber(phoneNumberText.getText()));
             } else {
                 System.out.println("Zakltualizowano klienta");
                 db.updateClient(client);
+                client.setId(db.getIdByPhoneNumber(phoneNumberText.getText()));
             }
 
 
@@ -551,6 +551,7 @@ public class billingSystemFrame extends JFrame {
     {
         JOptionPane.showMessageDialog(null, "<html><BODY TEXT=\"" + color + "\">" +infoMessage + "</html>", titleBar.equals("Error") ? "ErrorBox" : "InfoBox" + titleBar, JOptionPane.INFORMATION_MESSAGE);
     }
+
 
 }
 
