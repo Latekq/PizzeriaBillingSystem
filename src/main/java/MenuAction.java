@@ -11,7 +11,7 @@ public class MenuAction extends JPanel {
 
     private boolean fullScreen = false;
 
-    public MenuAction() {
+    public MenuAction(JFrame frame) {
         super(true);
 
         menuBar = new JMenuBar();
@@ -44,9 +44,8 @@ public class MenuAction extends JPanel {
 
 
         fullscreenItem.addActionListener(e -> { // fullscreen resize screen
-            for ( Window w : Window.getWindows() ) {
-                GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().setFullScreenWindow( !fullScreen ? w : null );
-            }
+                GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().setFullScreenWindow( !fullScreen ? frame : null );
+
             fullScreen = !fullScreen;
         });
 
