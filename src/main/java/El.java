@@ -1,7 +1,14 @@
-public class El {
+import java.io.InputStream;
+import java.io.Serial;
+import java.io.Serializable;
+
+public class El extends InputStream implements Serializable {
     private Pizza pizza;
     private int ammount;
     private float price;
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public El(Pizza pizza, int ammount, float price) {
         this.pizza = pizza;
@@ -38,5 +45,10 @@ public class El {
         return   pizza +
                 ", ilość: " + ammount +
                 ", cena: " + price;
+    }
+
+    @Override
+    public int read() {
+        return 0;
     }
 }
