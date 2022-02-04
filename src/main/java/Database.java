@@ -136,16 +136,19 @@ public class Database {
     public void addClient(Client c) {
         try {
             statement = conn.createStatement();
-            String query = "INSERT INTO `client` (`id`, `name`, `lastName`, `phoneNumber`, `adress`, `apartamentNumber`) VALUES (NULL, '" + c.getName()  + "', '" + c.getLastName()  + "', '" + c.getPhoneNumber()  + "', '" + c.getAdress()  +  "', '" + c.getApartamentNumber()  + "')" ;
-            statement.executeUpdate(query);
-            statement.close();
+            if (searchByPhoneNumber(c.getPhoneNumber()) == null) {
+                String query = "INSERT INTO `client` (`id`, `name`, `lastName`, `phoneNumber`, `adress`, `apartamentNumber`) VALUES (NULL, '" + c.getName()  + "', '" + c.getLastName()  + "', '" + c.getPhoneNumber()  + "', '" + c.getAdress()  +  "', '" + c.getApartamentNumber()  + "')" ;
+                System.out.println("Add Client");
+                statement.executeUpdate(query);
+                statement.close();
+            }
         } catch (SQLException throwables) {
             throwables.printStackTrace();
         }
     }
 
 
-    public Client szukajPoNr(String phoneNumber) {
+    public Client searchByPhoneNumber(String phoneNumber) {
         String query = "SELECT * FROM `client` WHERE `phoneNumber` LIKE '" + phoneNumber +"'";
         //System.out.println(query);
         Statement statement;
@@ -208,7 +211,7 @@ public class Database {
 
         try {
             statement = conn.createStatement();
-            String query = "INSERT INTO `orders`(`id`, `idCustomer`, `idPizzas`, `totalPrice`, `czasZamowienia`, `godzinaZamowienia`, `zrealizowano`) VALUES (NULL,'" + o.getClient().getId() + "','" + Arrays.toString(pizzas) +  "','" + o.getTotalPrice() + "','" + date + "','" + formatter.format(date) + "','"+ 0 + "')" ;
+            String query = "INSERT INTO `orders`(`id`, `idCustomer`, `idPizzas`, `totalPrice`, `orderTime`, `timeOfOrder`, `realized`) VALUES (NULL,'" + o.getClient().getId() + "','" + Arrays.toString(pizzas) +  "','" + o.getTotalPrice() + "','" + date + "','" + formatter.format(date) + "','"+ 0 + "')" ;
             //System.out.println(query);
             statement.executeUpdate(query);
             statement.close();
