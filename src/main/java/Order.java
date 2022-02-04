@@ -1,12 +1,27 @@
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Order {
+public class Order extends InputStream implements Serializable {
     private ArrayList<El> position = new ArrayList<>();
     private float totalPrice;
     private int orderType = -1;
     private Client client;
 
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     public Order() {
+    }
+
+
+    public Order(ArrayList<El> position, float totalPrice, int orderType, Client client) {
+        setPosition(position);
+        setTotalPrice(totalPrice);
+        setOrderType(orderType);
+        setClient(client);
     }
 
 
@@ -66,5 +81,10 @@ public class Order {
                 ", orderType=" + getOrderType() +
                 ", client=" + client +
                 '}';
+    }
+
+    @Override
+    public int read() {
+        return 0;
     }
 }
