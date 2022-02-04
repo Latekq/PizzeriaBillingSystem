@@ -1,5 +1,6 @@
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class billingSystemFrame extends JFrame {
     private static Order order = new Order();
@@ -44,34 +45,41 @@ public class billingSystemFrame extends JFrame {
         db.openConnection();
 
 
+        ConnectionToServer connectionToServer =  new ConnectionToServer();
+
+
+
         MenuAction menuAction = new MenuAction(this);
         setJMenuBar(menuAction.menuBar);
         fullscreen = menuAction.isFullScreen();
 
+        try {
+            rightBar(connectionToServer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        rightBar(db);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(defaultWidth,defaultHeight);
         setLocationRelativeTo(null);
 
 
-
         setLayout(null); // sets absolute positioning of components
         setVisible(true);
     }
 
-    private void rightBar(Database db) {
-        JPanel customerData = customerData(db);
-        JPanel selectPizza = selectPizza(db);
-        JPanel finalizeComponent = finalizeComponent(db);
+    private void rightBar(ConnectionToServer connectionToServer) throws IOException {
+        JPanel customerData = customerData(connectionToServer);
+        JPanel selectPizza = selectPizza(connectionToServer);
+        JPanel finalizeComponent = finalizeComponent(connectionToServer);
         add(selectPizza);
         add(customerData);
         add(finalizeComponent);
         selectPizza.setVisible(false);
         customerData.setVisible(true);
         finalizeComponent.setVisible(false);
-        clients = db.clients();
+        clients = connectionToServer.getClients();
         listClient.setListData(clients);
 
         final int numbersElement = 4;
@@ -108,7 +116,7 @@ public class billingSystemFrame extends JFrame {
             customerData.setVisible(true);
             selectPizza.setVisible(false);
             finalizeComponent.setVisible(false);
-            clients = db.clients();
+            clients = connectionToServer.getClients();
             listClient.setListData(clients);
             repaint();
             revalidate();
@@ -156,7 +164,7 @@ public class billingSystemFrame extends JFrame {
 
 
 
-    private JPanel customerData(Database db) {
+    private JPanel customerData( ConnectionToServer connectionToServer) {
         JPanel jpanel = new JPanel();
         jpanel.setLayout(null);
         jpanel.setBounds(100,0,1500,1500);
@@ -234,48 +242,51 @@ public class billingSystemFrame extends JFrame {
 
 
         inLocal.addActionListener(e -> {
-            if (savingData(db, phoneNumberText, nameClientText, lastNameClientText, streetClientText, apartmentNumberText)) {
+            if (savingData(connectionToServer, phoneNumberText, nameClientText, lastNameClientText, streetClientText, apartmentNumberText)) {
                 deliver.setBackground(null);
                 takeAway.setBackground(null);
                 inLocal.setBackground(Color.cyan);
-                listClient.setListData(db.clients());
+                listClient.setListData(connectionToServer.getClients());
                 order.setOrderType(1);
             }
         });
 
         takeAway.addActionListener(e -> {
-            if (savingData(db, phoneNumberText, nameClientText, lastNameClientText, streetClientText, apartmentNumberText)) {
+            if (savingData(connectionToServer, phoneNumberText, nameClientText, lastNameClientText, streetClientText, apartmentNumberText)) {
                 inLocal.setBackground(null);
                 deliver.setBackground(null);
                 takeAway.setBackground(Color.cyan);
-                listClient.setListData(db.clients());
+                listClient.setListData(connectionToServer.getClients());
                 order.setOrderType(2);
             }
         });
 
         deliver.addActionListener(e -> {
-            if (savingData(db, phoneNumberText, nameClientText, lastNameClientText, streetClientText, apartmentNumberText)) {
+            if (savingData(connectionToServer, phoneNumberText, nameClientText, lastNameClientText, streetClientText, apartmentNumberText)) {
                 inLocal.setBackground(null);
                 takeAway.setBackground(null);
                 deliver.setBackground(Color.cyan);
-                listClient.setListData(db.clients());
+                listClient.setListData(connectionToServer.getClients());
                 order.setOrderType(3);
             }
         });
 
 
         search.addActionListener(e->{
-            System.out.println("Szukaj");
-
-            if(db.szukajPoNr(phoneNumberText.getText()) != null) {
-                client = db.szukajPoNr(phoneNumberText.getText());
-                nameClientText.setText(client.getName());
-                lastNameClientText.setText(client.getLastName());
-                streetClientText.setText(client.getAdress());
-                apartmentNumberText.setText(client.getApartamentNumber());
+            if(phoneNumberText.getText().length() == 9) {
+                if(connectionToServer.searchByPhoneNumber(phoneNumberText.getText()) != null) {
+                    client = connectionToServer.searchByPhoneNumber(phoneNumberText.getText());
+                    nameClientText.setText(client.getName());
+                    lastNameClientText.setText(client.getLastName());
+                    streetClientText.setText(client.getAdress());
+                    apartmentNumberText.setText(client.getApartamentNumber());
+                } else {
+                    infoBox("Nie znaleziono.", "Error", "RED");
+                }
             } else {
-                infoBox("Brak numeru telefonu.", "Error", "RED");
+                infoBox("Nr telefonu jest błędny.", "Error", "RED");
             }
+
         });
 
         listClient.addListSelectionListener(e->{
@@ -297,13 +308,13 @@ public class billingSystemFrame extends JFrame {
 
 
 
-    private JPanel selectPizza(Database db) {
+    private JPanel selectPizza(ConnectionToServer connectionToServer) throws IOException {
         JPanel jpanel = new JPanel();
         jpanel.setLayout(null);
         jpanel.setBounds(100,0,1500,1500);
 
 
-        Pizza[] pizzas  = db.typesOfPizza();
+        Pizza[] pizzas  = connectionToServer.getPizzas();
 
         JScrollPane scrollPane = new JScrollPane();
         JList<Pizza> list = new JList<>(pizzas);
@@ -373,7 +384,7 @@ public class billingSystemFrame extends JFrame {
 
 
 
-    private JPanel finalizeComponent(Database db) {
+    private JPanel finalizeComponent(ConnectionToServer connectionToServer) {
         JPanel jpanel = new JPanel();
         jpanel.setLayout(null);
         jpanel.setBounds(100,0,1500,1500);
@@ -447,8 +458,25 @@ public class billingSystemFrame extends JFrame {
         pursue.addActionListener(e -> {
             System.out.println("purse");
             System.out.println(order);
+            String message = "";
+            if (order.getClient() !=null) {
+                message += "Brak danych o kliencie<br>";
+            }
+            if (order.getPosition().size() != 0) {
+                message += "Brak wybranej pizzy <br>";
+            }
+            if (order.getClient().getId() != 0) {
+                message += "Bład dodania klienta do bazy<br>";
+            }
+
+            if ( order.getClient().getPhoneNumber().length() == 9) {
+                message += "Zły nr telefonu<br>";
+            }
+            if (order.getClient().getName().length() >= 3) {
+                message += "Błędne imie";
+            }
             if (order.getClient() !=null && order.getPosition().size() != 0  && order.getClient().getId() != 0 && order.getClient().getPhoneNumber().length() == 9 && order.getClient().getName().length() >= 3) {
-                db.addOrder(order);
+                connectionToServer.sendOrder(order);
                 infoBox("Dodano zamówienie!", "Dodano zamówienie", "Green");
                 phoneNumberText.setText("");
                 nameClientText.setText("");
@@ -471,10 +499,9 @@ public class billingSystemFrame extends JFrame {
                 revalidate();
                 repaint();
             } else {
-                infoBox("Nie uzupełniono wszystkich danych!<br>"
-                        +(order.getPosition().size() != 0 ? "" : "Brak wybranej pizzy<br>")
-                        +(order.getClient() == null ? "Brak danych o kliencie<br>": (order.getClient().getPhoneNumber().length() == 9? "": "Zły nr telefonu<br>") + (order.getClient().getName().length() >= 3? "": "Błąd w imieniu<br>"))
-                        , "Error",
+                infoBox("Nie uzupełniono wszystkich danych!<br>" +
+                       message,
+                        "Error",
                         "RED");
             }
         });
@@ -506,7 +533,7 @@ public class billingSystemFrame extends JFrame {
         return jpanel;
     }
 
-    private boolean savingData(Database db, JTextField phoneNumberText, JTextField nameClientText, JTextField lastNameClientText, JTextField streetClientText, JTextField apartmentNumberText) {
+    private boolean savingData(ConnectionToServer connection, JTextField phoneNumberText, JTextField nameClientText, JTextField lastNameClientText, JTextField streetClientText, JTextField apartmentNumberText) {
         if(phoneNumberText.getText().length() == 9 && nameClientText.getText().length() >= 3 && lastNameClientText.getText().length() >= 3 && streetClientText.getText().length() >= 3 && apartmentNumberText.getText().length() >= 1) {
 
 
@@ -519,19 +546,15 @@ public class billingSystemFrame extends JFrame {
                     apartmentNumberText.getText()
             );
 
-            if(db.szukajPoNr(phoneNumberText.getText()) == null) {
-                System.out.println("Utworzono klienta");
-                System.out.println("Klient"  + client);
-                db.addClient(client);
+            if (connection.searchByPhoneNumber(client.getPhoneNumber()) == null) {
+                client.setId(connection.addClinet(client));
             } else {
-                System.out.println("Zakltualizowano klienta");
-                db.updateClient(client);
-                client.setId(db.getIdByPhoneNumber(phoneNumberText.getText()));
+                connection.updateClient(client);
+                client.setId(connection.getIdByPhoneNumber(client.getPhoneNumber()));
             }
 
 
 
-            System.out.println("Klient "  + client);
             order.setClient(client);
             return true;
         } else {
@@ -555,4 +578,3 @@ public class billingSystemFrame extends JFrame {
 
 }
 
-// nie dziala odklikniecie przyciskow inlocal, outstore, delivery
