@@ -1,10 +1,19 @@
-public class Client {
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serial;
+import java.io.Serializable;
+
+public class Client extends InputStream implements Serializable {
     private int id;
     private String name;
     private String lastName;
     private String phoneNumber;
     private String adress;
     private String apartamentNumber;
+
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public Client(int id, String name, String lastName, String phoneNumber, String adress, String apartamentNumber) {
         setId(id);
@@ -25,6 +34,12 @@ public class Client {
 
     public Client() {
 
+    }
+
+
+    @Override
+    public int read() {
+        return 0;
     }
 
 
