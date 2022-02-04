@@ -1,10 +1,18 @@
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Pizza {
+public class Pizza extends InputStream implements Serializable {
     private int id;
     private String name;
     private ArrayList<String> ingredients;
     private float price;
+
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     public Pizza(int id, String name, ArrayList<String> ingredients, float price) {
         setId(id);
@@ -53,5 +61,8 @@ public class Pizza {
     }
 
 
-
+    @Override
+    public int read() {
+        return 0;
+    }
 }
